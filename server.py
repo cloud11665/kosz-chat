@@ -37,15 +37,23 @@ class ConnectionManager:
 
 manager = ConnectionManager()
 
+def users(num):
+	if num == 1:
+		return f"${num} User online"
+	return f"${num} Users online"
+
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
 		try:
 			await manager.connect(websocket)
 			await manager.broadcast(f"~#{client_id} has joined the chat.")
+			await manager.broadcast(users(len(manager.active_connections)))
 			while True:
 				data = await websocket.receive_text()
 				if data and data != "``" and len(data) < 1000:
 					await manager.broadcast(f"{client_id}: {data}")
+
 		except WebSocketDisconnect:
 			manager.disconnect(websocket)
+			await manager.broadcast(users(len(manager.active_connections)))
 			await manager.broadcast(f"~#{client_id} has left the chat.")

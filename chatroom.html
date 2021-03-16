@@ -36,12 +36,17 @@
 
 <body>
 	<div id="chat" style="position: sticky; top: 0;">
-		<div style="background: white; height:15rem; z-index: 10;">
+		<div style="background: white; height:16rem; z-index: 10;">
 		</div>
-		<div style="z-index: 20; margin-top: -15rem;">
+		<div style="z-index: 20; margin-top: -16rem;">
 			<a href="./index.html">
-				<h1 class="display-1" align="center" style="padding-bottom: 3rem;">kosz-czat</h1>
+				<h1 class="display-1" align="center" style="padding-bottom: 2rem;">kosz-czat</h1>
 			</a>
+
+			<p id="users" align="center">
+				<span class="badge rounded-pill bg-success">
+				</span>
+			</p>
 
 			<form action="" onsubmit="sendMessage(event)" id="form">
 				<div class="mb-3" style="width: 50vw; margin-left: auto; margin-right: auto;">
@@ -60,9 +65,17 @@
 		var ws = new WebSocket(`${getUrlVars()["cn"]}/ws/${clientID}`);
 
 		function processMessage(event) {
+			var data = event.data
+
+			if (data.startsWith("$")) {
+				var users = document.getElementById("users")
+				data = data.substring(1)
+				users.children[0].innerHTML = data
+				return
+			}
+
 			var messages = document.getElementById('messages')
 			var message = document.createElement('li')
-			var data = event.data
 
 			if (!data.startsWith("~")) {
 				var id = data.match(/^\d+/)[0]
@@ -92,7 +105,7 @@
 						if (img.match(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/)) {
 							var im = document.createElement("img")
 							im.src = img
-							im.style.maxHeight = "20vw"
+							im.style.width = "20vw"
 							im.style.paddingTop = "1rem"
 							im.style.paddingLeft = "1rem"
 							im.style.paddingBottom = "1rem"
