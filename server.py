@@ -6,13 +6,13 @@ from fastapi.responses import HTMLResponse
 app = FastAPI()
 
 
-@app.get("/")
+@app.get("/indes.html")
 async def index():
 		return HTMLResponse(open('./index.html', 'r').read())
 
-@app.get("/chatroom")
+@app.get("/chatroom.html")
 async def chat():
-		return HTMLResponse(open('./chat.html', 'r').read())
+		return HTMLResponse(open('./chatroom.html', 'r').read())
 
 class ConnectionManager:
 		def __init__(self):
