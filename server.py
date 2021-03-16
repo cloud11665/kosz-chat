@@ -45,13 +45,14 @@ def users(num):
 @app.websocket("/ws/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
 		try:
-			await manager.connect(websocket)
-			await manager.broadcast(f"~#{client_id} has joined the chat.")
-			await manager.broadcast(users(len(manager.active_connections)))
-			while True:
-				data = await websocket.receive_text()
-				if data and data != "``" and len(data) < 1000:
-					await manager.broadcast(f"{client_id}: {data}")
+			if len(manager.active_connections) < 150:
+				await manager.connect(websocket)
+				await manager.broadcast(f"~#{client_id} has joined the chat.")
+				await manager.broadcast(users(len(manager.active_connections)))
+				while True:
+					data = await websocket.receive_text()
+					if data and data != "``" and len(data) < 1000:
+						await manager.broadcast(f"{client_id}: {data}")
 
 		except WebSocketDisconnect:
 			try:
