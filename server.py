@@ -44,7 +44,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 		try:
 				while True:
 						data = await websocket.receive_text()
-						if data and data != "``":
+						if data and data != "``" and len(data) < 1000:
 							await manager.broadcast(f"{client_id}: {data}")
 		except WebSocketDisconnect:
 				manager.disconnect(websocket)
