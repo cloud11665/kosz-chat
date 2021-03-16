@@ -5,6 +5,15 @@ from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
+
+@app.get("/")
+async def index():
+		return HTMLResponse(open('./index.html', 'r').read())
+
+@app.get("/chatroom")
+async def chat():
+		return HTMLResponse(open('./chat.html', 'r').read())
+
 class ConnectionManager:
 		def __init__(self):
 				self.active_connections: List[WebSocket] = []
