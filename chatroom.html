@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+	<style>
+		a, a:hover, a:active, a:visited {
+			color: black;
+			text-decoration: none;
+		}
+
+		ul {
+			list-style-type: none;
+			margin-left: 25vw;
+			margin-right: 25vw;
+			margin-bottom: 10rem;
+		}
+
+		li {
+			padding-top: 0.5rem;
+			word-wrap: break-word;
+		}
+	</style>
+	<script>
+		function getUrlVars() {
+			var vars = {};
+			var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+					vars[key] = value;
+			});
+			return vars;
+		}
+	</script>
+</head>
+
+<body>
+	<div id="chat" style="position: sticky; top: 0;">
+		<div style="background: white; height:15rem; z-index: 10;">
+		</div>
+		<div style="z-index: 20; margin-top: -15rem;">
+			<a href="./index.html">
+				<h1 class="display-1" align="center" style="padding-bottom: 3rem;">kosz-czat</h1>
+			</a>
+
+			<form action="" onsubmit="sendMessage(event)" id="form">
+				<div class="mb-3" style="width: 50vw; margin-left: auto; margin-right: auto;">
+					<input type="text" id="messageText" class="form-control" autocomplete="off" />
+					<button class="btn btn-primary mb-3" style="width: 50vw; margin-left: auto; margin-right: auto;">Send</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<ul id='messages'></ul>
+
+	<script>
+		var clientID = Date.now() % 1000000;
+		document.title = `kosz-czat [${getUrlVars()["cn"]}]`
+		var ws = new WebSocket(`${getUrlVars()["cn"]}/ws/${clientID}`);
+
+		function processMessage(event) {
+			var messages = document.getElementById('messages')
+			var message = document.createElement('li')
+			var data = event.data
+
+			if (!data.startsWith("~")) {
+				var id = data.match(/^\d+/)[0]
+				if (id == clientID) {
+					id = `(you) #${data.match(/^\d+:\s/)[0]}`
+				}
+				else {
+					id = `#${data.match(/^\d+:\s/)[0]}`
+				}
+
+				var msg = data.match(/:\s.*$/)[0].substr(2)
+
+				var text = msg.replace(/`.*?`/g, "")
+				console.log(msg)
+				if (!text) {
+					text = ""
+				}
+				text = text.trim()
+
+				message.appendChild(document.createTextNode(id));
+				message.appendChild(document.createElement('br'));
+
+				var img_url = msg.match(/`.*?`/g)
+				if (img_url) {
+					img_url.forEach((img) => {
+						img = img.substr(1,img.length-2)
+						if (img.match(/((([A-Za-z]{3,9}:(?:\/\/)?)(?:[\-;:&=\+\$,\w]+@)?[A-Za-z0-9\.\-]+|(?:www\.|[\-;:&=\+\$,\w]+@)[A-Za-z0-9\.\-]+)((?:\/[\+~%\/\.\w\-_]*)?\??(?:[\-\+=&;%@\.\w_]*)#?(?:[\.\!\/\\\w]*))?)/)) {
+							var im = document.createElement("img")
+							im.src = img
+							im.style.maxHeight = "25rem"
+							im.style.paddingTop = "1rem"
+							im.style.paddingLeft = "1rem"
+							im.style.paddingBottom = "1rem"
+							message.appendChild(im)
+							message.appendChild(document.createElement('br'));
+						}
+					})
+				}
+
+				message.appendChild(document.createTextNode(text));
+			} else {
+				message.style.textAlign = "center"
+				var strong = document.createElement('strong')
+				strong.appendChild(document.createTextNode(data.substr(1)))
+				message.appendChild(strong)
+			}
+
+			messages.appendChild(message)
+			message.children[message.children.length-1].scrollIntoView()
+		}
+
+		ws.onmessage = processMessage;
+
+		function sendMessage(event) {
+			var input = document.getElementById("messageText")
+			ws.send(input.value);
+
+			input.value = ''
+			event.preventDefault()
+		}
+	</script>
+</body>
+
+</html>
