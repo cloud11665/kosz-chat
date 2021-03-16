@@ -5,6 +5,9 @@ from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
+@app.get("/")
+async def index():
+		return HTMLResponse(open('./index.html', 'r').read())
 
 @app.get("/index.html")
 async def index():
